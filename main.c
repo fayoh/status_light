@@ -22,22 +22,28 @@ unsigned char GREEN_INTENSITY;
  * Functions
  **/
 void init_clks() {
+  /**
+   * Setup system clock for cpu and peripherals
+   **/
 
-  // Set fMaster to 16MHz
+  // Set fCPU = fMaster = fHSI = 16MHz
+  //(such overkill, but we have no power budget to worry about,
+  // optimise later if needed)
   CLK_CKDIVR = 0;
 
-  // Enable clock for TIM1,TIM2,UARTx
-  CLK_PCKENR1 = 0xFF;
-  CLK_PCKENR2 &= 0xF3;
+  // Enable clock for TIM2 and UART1
+  CLK_PCKENR1 = (CLK_PCKENR1_TIM2 | PCKENR1_UART1);
+  CLK_PCKENR2 = 0x0;
 }
 
 void init_uart() {
   // Setup UART1 to 9600,8,n,1
+  // 8 bit words, 1 sop bit and no parity is default behaviour
+  UART1_BRR2 = 0x03; //BRR1 updates the baud counters so BRR2 needs to be first
   UART1_BRR1 = 0x68;
-  UART1_BRR2 = 0x03;
 
-  // Enable transmitter and receiver
-  UART1_CR2 |= (UART1_CR2_TEN | UART1_CR2_REN);
+  // Enable receiver
+  UART1_CR2 |= UART1_CR2_REN;
 
   // Enable interrupt on rx buffer full
   UART1_CR2 |= UART1_CR2_RIEN;
@@ -46,27 +52,28 @@ void init_uart() {
 
 void init_pwm() {
 
-  // Set top limit
-  TIM2_ARRH = 0xC3;
-  TIM2_ARRL = 0x50;
+  // Set auto reload value to 6400 giving us a frequency of 2.5kHz
+  // We get duty cycle as 0-100 on the serial interface and 100<<6=6400
+  TIM2_ARRH = 0x19;
+  TIM2_ARRL = 0x00;
 
-  // Set channel lowerlimit
-  TIM2_CCR1H = 0x30;
-  TIM2_CCR1L = 0xd4;
-  TIM2_CCR2H = 0x30;
-  TIM2_CCR2L = 0xd4;
-  TIM2_CCR3H = 0x30;
-  TIM2_CCR3L = 0xd4;
-  
+  // Set compare value to 50%
+  TIM2_CCR1H = 0x0C;
+  TIM2_CCR1L = 0x80;
+  TIM2_CCR2H = 0x0C;
+  TIM2_CCR2L = 0x80;
+  TIM2_CCR3H = 0x0C;
+  TIM2_CCR3L = 0x80;
+
   // Activate PWM mode 2 for channel 1-3
-  TIM2_CCMR1 |= 0xE8;
-  TIM2_CCMR2 |= 0xE8;
-  TIM2_CCMR3 |= 0xE8;
+  TIM2_CCMR1 = TIMX_CCMR_PWM1;
+  TIM2_CCMR2 = TIMX_CCMR_PWM1;
+  TIM2_CCMR3 = TIMX_CCMR_PWM1;
 
   //Enable output
-  TIM2_CCER1 |= (1 << TIM2_CCER1_CC2E);
-  TIM2_CCER1 |= (1 << TIM2_CCER1_CC1E);
-  TIM2_CCER2 |= (1 << TIM2_CCER2_CC3E);
+  TIM2_CCER1 |= TIM2_CCER1_CC2E;
+  TIM2_CCER1 |= TIM2_CCER1_CC1E;
+  TIM2_CCER2 |= TIM2_CCER2_CC3E;
 }
 
 void rx_isr() __interrupt(UART1_RXC_ISR) {
@@ -83,7 +90,7 @@ void rx_isr() __interrupt(UART1_RXC_ISR) {
 //    MSG_INDEX++;
   }
   UART1_DR = UART1_DR;
-  // Discard unwanted data
+  // Discard unwanted data, write zero to uart_sr
 }
 
 
