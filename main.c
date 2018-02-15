@@ -32,7 +32,7 @@ void init_clks() {
   CLK_CKDIVR = 0;
 
   // Enable clock for TIM2 and UART1
-  CLK_PCKENR1 = (CLK_PCKENR1_TIM2 | PCKENR1_UART1);
+  CLK_PCKENR1 = (CLK_PCKENR1_TIM2 | CLK_PCKENR1_UART1);
   CLK_PCKENR2 = 0x0;
 }
 
