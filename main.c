@@ -11,12 +11,7 @@
 
 // Receive buffer for commands
 static volatile unsigned char CMD_RECV = 0;
-
-// Intensity for the LEDs (pwm)
-unsigned char RED_INTENSITY;
-unsigned char YELLOW_INTENSITY;
-unsigned char GREEN_INTENSITY;
-
+static volatile unsigned char DATA_RECV = 0;
 
 /**
  * Functions
@@ -43,7 +38,7 @@ void init_uart() {
   UART1_BRR1 = 0x68;
 
   // Enable receiver
-  UART1_CR2 |= UART1_CR2_REN;
+  UART1_CR2 |= (UART1_CR2_TEN | UART1_CR2_REN);
 
   // Enable interrupt on rx buffer full
   UART1_CR2 |= UART1_CR2_RIEN;
@@ -51,11 +46,10 @@ void init_uart() {
 }
 
 void init_pwm() {
-
-  // Set auto reload value to 6400 giving us a frequency of 2.5kHz
-  // We get duty cycle as 0-100 on the serial interface and 100<<6=6400
-  TIM2_ARRH = 0x19;
-  TIM2_ARRL = 0x00;
+  // Set auto reload value to 0xFF0 giving us a frequency of approximatel 3.9kHz
+  // We get duty cycle as a byte on the serial interface and 0xFF<<6=0xFF0
+  TIM2_ARRH = 0x0F;
+  TIM2_ARRL = 0xF0;
 
   // Set compare value to 50%
   TIM2_CCR1H = 0x0C;
@@ -74,86 +68,85 @@ void init_pwm() {
   TIM2_CCER1 |= TIM2_CCER1_CC2E;
   TIM2_CCER1 |= TIM2_CCER1_CC1E;
   TIM2_CCER2 |= TIM2_CCER2_CC3E;
+
+  //Start counter
+  TIM2_CR1 |= TIM2_CR1_CEN;
+
 }
 
 void rx_isr() __interrupt(UART1_RXC_ISR) {
   // If CMD_RECV is empty we have received a new command
   // otherwise it should be part of a message string
   unsigned char tmp = 0;
-
+  tmp = UART1_DR;
   if (CMD_RECV == 0) {
-      CMD_RECV = UART1_DR;
-//    } else if (((CMD_RECV & CMD_MASK) == MESSAGE_LINE_1) ||
-//	       ((CMD_RECV & CMD_MASK) == MESSAGE_LINE_1) &&
-//	       (MSG_INDEX < (CMD_RECV & DATA_MASK))) {
-//    MSG_ISR[MSG_INDEX] = UART1_DR;
-//    MSG_INDEX++;
+    CMD_RECV = tmp;
+  } else {
+    if (DATA_RECV == 0) {
+    DATA_RECV = tmp;
+    }
   }
-  UART1_DR = UART1_DR;
-  // Discard unwanted data, write zero to uart_sr
+  UART1_DR = 0xF0;
+  while(!(UART1_SR & 1<<6)){};
 }
 
+void update_pwm(unsigned char channel, unsigned char value) {
+  unsigned char high = value >> 2;
+  unsigned char low  = value << 6;
 
-//char command_received() __critical {
-//  if (CMD_RECV) {
-//    // Check if a complete message has been received
-//    if (((CMD_RECV & CMD_MASK) == MESSAGE_LINE_1) ||
-//	((CMD_RECV & CMD_MASK) == MESSAGE_LINE_2)) {
-//      if ((CMD_RECV & DATA_MASK) == MSG_INDEX) {
-//	memcpy(msg,MSG_ISR,MSG_INDEX);
-//	MSG_INDEX = 0;
-//	return TRUE;
-//      } else {
-//	return FALSE;
-//      }
-//    }
-//    return TRUE;	  
-//  }
-//  return FALSE;
-//}
-
-//void update_pwm() {
-//  //Do stuff
-//  if (PD_ODR) {
-//    PD_ODR = 0xFF;
-//  } else {
-//    PD_ODR = 0;
-//  }
-//}
+  switch(channel) {
+  case RED:
+    TIM2_CCR1H = high;
+    TIM2_CCR1L = low;
+    break;
+  case ORANGE:
+    TIM2_CCR2H = high;
+    TIM2_CCR2L = low;
+  case GREEN:
+    TIM2_CCR3H = high;
+    TIM2_CCR3L = low;
+  }
+}
 
 void main() {
-  unsigned char cmd = 0;
-
-  PB_DDR = 0x20;
-  PB_ODR = 0x20;
-  PB_CR1 = 0x20; 
+  volatile unsigned char cmd  = 0;
+  volatile unsigned char data = 0;
 
   init_clks();
   init_uart();
   init_pwm();
-  while(TRUE) {
-    enter_wait_state();
 
+  while(TRUE) {
+
+    enter_wait_state();
     // Fetch received command before it gets overwritten
     __critical {
-      if (CMD_RECV) {
-	cmd = CMD_RECV;
-	CMD_RECV = 0;
+      if (CMD_RECV && DATA_RECV) {
+        //UART1_DR = 0x02;
+        cmd  = CMD_RECV;
+        data = DATA_RECV;
       }
     }
-//    switch(cmd & CMD_MASK) {
-//    case LIGHT_INTENSITY:
-//      PB_ODR ^=0x20;
-//      PD_ODR ^= 0x10;
-//      break;
-//    case LIGHT_BLINK:
-//      PD_ODR ^= 0x02;
-//      break;
-//    case LIGHT_PULSE:
-//      PD_ODR ^= 0x04;
-//      break;
-//    default:
-//      break;
-//    }
+
+    if (cmd) {
+      switch(cmd & CMD_MASK) {
+      case LIGHT_INTENSITY:
+        update_pwm(cmd & DATA_MASK, data);
+        break;
+      case LIGHT_BLINK:
+        // Do nothing for now
+        break;
+      case LIGHT_PULSE:
+        // Do nothing for now
+        break;
+      default:
+        // Ignore unknown commands
+        TIM2_CCR1H = 0x00;
+        TIM2_CCR1L = cmd;
+        break;
+      }
+    }
+    cmd  = 0;
+    data = 0;
   }
 }

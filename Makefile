@@ -10,7 +10,7 @@ HEXFILE=status_light.hex
 OBJECTS=main.rel
 HEADERS=cmds.h
 
-CFLAGS=--Werror --funsigned-char
+CFLAGS=--Werror
 MFLAGS=-m$(MCUTYPE)
 LFLAGS=-l$(MCUTYPE) --out-fmt-ihx
 

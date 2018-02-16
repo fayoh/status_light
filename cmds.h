@@ -9,9 +9,9 @@
 #define MESSAGE_LINE_2  (0x5 << 5)
 
 // Bit 4-0: data
-#define RED   0x1
-#define ORANE 0x2
-#define GREEN 0x3
+#define RED    0x1
+#define ORANGE 0x2
+#define GREEN  0x4
 
 #define CMD_MASK  0xE0
 #define DATA_MASK 0x1F
