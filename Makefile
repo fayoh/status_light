@@ -26,8 +26,8 @@ clean:
 	rm -f *asm *cdb *lst *map *mem *rel *rst *sym *lk
 	rm -f $(HEXFILE)
 
-flash: $(OBJECTS)
-	$(STM8FLASH) -c$(PROGRAMMER) -p$(DEVICE) -w $(OBJECTS)
+flash: $(HEXFILE)
+	$(STM8FLASH) -c$(PROGRAMMER) -p$(DEVICE) -w $(HEXFILE)
 
 %.rel: %.c $(HEADERS)
 	$(SDCC) -c $(MFLAGS) $(CFLAGS) $<

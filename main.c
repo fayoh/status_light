@@ -10,8 +10,8 @@
  **/
 
 // Receive buffer for commands
-static volatile unsigned char CMD_RECV = 0;
-static volatile unsigned char DATA_RECV = 0;
+static volatile unsigned char CMD_RECV[2] = {0,0};
+static volatile unsigned char CMD_READY = 0;
 
 /**
  * Functions
@@ -46,20 +46,22 @@ void init_uart() {
 }
 
 void init_pwm() {
-  // Set auto reload value to 0xFF0 giving us a frequency of approximatel 3.9kHz
-  // We get duty cycle as a byte on the serial interface and 0xFF<<6=0xFF0
+  // Set auto reload value to 0xFEF giving us a frequency of approximatel 3.9kHz
+  // We get duty cycle as a byte on the serial interface and 0xFF<<4=0xFF0
+  // At maximum value compare will be larger than the reload value, giving
+  // a nice continously high signal
   TIM2_ARRH = 0x0F;
-  TIM2_ARRL = 0xF0;
+  TIM2_ARRL = 0xEF;
 
-  // Set compare value to 50%
-  TIM2_CCR1H = 0x0C;
-  TIM2_CCR1L = 0x80;
-  TIM2_CCR2H = 0x0C;
-  TIM2_CCR2L = 0x80;
-  TIM2_CCR3H = 0x0C;
-  TIM2_CCR3L = 0x80;
+  // Set compare value to 0%
+  TIM2_CCR1H = 0x00;
+  TIM2_CCR1L = 0x00;
+  TIM2_CCR2H = 0x00;
+  TIM2_CCR2L = 0x00;
+  TIM2_CCR3H = 0x00;
+  TIM2_CCR3L = 0x00;
 
-  // Activate PWM mode 2 for channel 1-3
+  // Put all channels to PMW1 mode
   TIM2_CCMR1 = TIMX_CCMR_PWM1;
   TIM2_CCMR2 = TIMX_CCMR_PWM1;
   TIM2_CCMR3 = TIMX_CCMR_PWM1;
@@ -76,23 +78,20 @@ void init_pwm() {
 
 void rx_isr() __interrupt(UART1_RXC_ISR) {
   // If CMD_RECV is empty we have received a new command
-  // otherwise it should be part of a message string
-  unsigned char tmp = 0;
-  tmp = UART1_DR;
-  if (CMD_RECV == 0) {
-    CMD_RECV = tmp;
+  // TODO: otherwise it should be part of a message string
+  if (CMD_RECV[0] == 0) {
+    CMD_RECV[0] = UART1_DR;
   } else {
-    if (DATA_RECV == 0) {
-    DATA_RECV = tmp;
-    }
+    CMD_RECV[1] = UART1_DR;
+    CMD_READY = 1;
   }
-  UART1_DR = 0xF0;
-  while(!(UART1_SR & 1<<6)){};
 }
 
 void update_pwm(unsigned char channel, unsigned char value) {
-  unsigned char high = value >> 2;
-  unsigned char low  = value << 6;
+  // We could do some kind of tan curve for this to
+  // compensate for the eye
+  unsigned char high = value >> 4;
+  unsigned char low  = value << 4;
 
   switch(channel) {
   case RED:
@@ -102,14 +101,18 @@ void update_pwm(unsigned char channel, unsigned char value) {
   case ORANGE:
     TIM2_CCR2H = high;
     TIM2_CCR2L = low;
+    break;
   case GREEN:
     TIM2_CCR3H = high;
     TIM2_CCR3L = low;
+  default:
+    //Ignore
+    break;
   }
 }
 
 void main() {
-  volatile unsigned char cmd  = 0;
+  volatile unsigned char cmd   = 0;
   volatile unsigned char data = 0;
 
   init_clks();
@@ -121,17 +124,19 @@ void main() {
     enter_wait_state();
     // Fetch received command before it gets overwritten
     __critical {
-      if (CMD_RECV && DATA_RECV) {
-        //UART1_DR = 0x02;
-        cmd  = CMD_RECV;
-        data = DATA_RECV;
+      if (CMD_READY) {
+        cmd  = CMD_RECV[0];
+        data = CMD_RECV[1];
+        CMD_RECV[0] = CMD_RECV[1] = CMD_READY = 0;
       }
     }
 
-    if (cmd) {
+    if (cmd & CMD_MASK) {
       switch(cmd & CMD_MASK) {
       case LIGHT_INTENSITY:
-        update_pwm(cmd & DATA_MASK, data);
+        UART1_DR = 0x01;
+        while(!(UART1_SR & UART1_SR_TXE)){};
+        update_pwm(cmd & LED_MASK, data);
         break;
       case LIGHT_BLINK:
         // Do nothing for now

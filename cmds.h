@@ -14,6 +14,6 @@
 #define GREEN  0x4
 
 #define CMD_MASK  0xE0
-#define DATA_MASK 0x1F
+#define LED_MASK 0x1F
 
 #endif //CMDS_H
