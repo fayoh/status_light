@@ -7,7 +7,7 @@ DEVICE=stm8s103f3
 PROGRAMMER=stlinkv2
 
 HEXFILE=status_light.hex
-OBJECTS=main.rel
+OBJECTS=main.rel pwm.rel
 HEADERS=cmds.h
 
 CFLAGS=--Werror
