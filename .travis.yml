@@ -7,6 +7,6 @@ install:
   - tar xjf sdcc-3.8.0-amd64-unknown-linux2.5.tar.bz2
   - pushd sdcc-3.8.0 && sudo cp -r * /usr/local && popd && sdcc -v
   - git clone -q --depth 1 https://github.com/fayoh/stm8s-util.git
-  - pushd stm8s-util && sudo make install && popd
+  - pushd stm8s-util && sudo make PREFIX=/usr/local/share/sdcc install && popd
 
 script: make
