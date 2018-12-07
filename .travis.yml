@@ -1,0 +1,13 @@
+language: c
+
+addons:
+  apt:
+    packages:
+      - sdcc
+
+install:
+  sdcc -v &&
+  git clone -q --depth 1 https://github.com/fayoh/stm8s-util.git &&
+  pushd stm8s-util && sudo make install && popd
+
+script: make
