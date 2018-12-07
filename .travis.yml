@@ -1,0 +1,16 @@
+language: c
+dist: xenial
+install:
+- wget https://netix.dl.sourceforge.net/project/sdcc/sdcc-linux-amd64/3.8.0/sdcc-3.8.0-amd64-unknown-linux2.5.tar.bz2
+- tar xjf sdcc-3.8.0-amd64-unknown-linux2.5.tar.bz2
+- pushd sdcc-3.8.0 && sudo cp -r * /usr/local && popd && sdcc -v
+- git clone -q --depth 1 https://github.com/fayoh/stm8s-util.git
+- pushd stm8s-util && sudo make PREFIX=/usr/local/share/sdcc install && popd
+script: make
+deploy:
+  provider: releases
+  api_key:
+    secure: aUcc1JUejRe3wwJ/lOQxsfRobWWXEqZAVdn9vRPMplwyJhw/hpzDwm6ZLYZMUZz25uLhgC78wKB/zTRYPIanISoWupmlUWTfz32s9I3x2UvTkxxc385bn9Pt/MD3NIzvm3NkwjvLmUHMs50fujGIyNknjJGsRUI081+ob//W/SJp4FDj/jqy8qojMyu9weIMDW/djqsQiTazmF+aHtDuizN/cfQ42ncz7QeBsHqH2N3l5lcdZPwYlMrY4thnLqynegu5xwAS8PxkKpzJxu8G6M4aXBrw1LUEqxaoxPwIqPXPDb7ezIvaELPJKG+I043IUcBPdMrAPON4Y0s/6iovoBc3NEttQ7y4MRvSykHd47YsI5pOD82HrNLmCE+MQ0JsLvAvSbpC9E3Ce30fQeI2JG6HWCC0YunPTZzLatpWXG47/wrsFkzLvoICoR3ef9TcbrKdzVux2jWcbS7abd7QJMt6owZi0SnBIkfJHTAH3XQ7BiwKTM9Guxh2JJG6TXwrJulkmX1kPLY37j/BgTTzmRQIfPUNFXr1pvVAv0QfiNhcoeT0//7NSV+nQsouGLG3nK249T9pbEFbjWGxhMZh1rpOzmMz4P/LA9ZQO4rz7HY6SsQkNWVjKEgULttHafI0Wmu1GSWyBBjYfZKdKhvBzuoAssI1R3gbhEys3nZjGJA=
+  file: status_light.hex
+  on:
+    repo: fayoh/status_light
