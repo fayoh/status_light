@@ -62,3 +62,8 @@ dkms.conf
 *rst
 *sym
 *rel
+
+# Python output
+*pyc
+*whl
+*tar.gz

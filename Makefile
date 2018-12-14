@@ -1,33 +1,27 @@
-SDCC=sdcc
-SDLD=sdld
-STM8FLASH=stm8flash
-
-MCUTYPE=stm8
-DEVICE=stm8s103f3
-PROGRAMMER=stlinkv2
+MAKE=make
 
 HEXFILE=status_light.hex
-OBJECTS=main.rel
-HEADERS=cmds.h
-
-CFLAGS=--Werror
-MFLAGS=-m$(MCUTYPE)
-LFLAGS=-l$(MCUTYPE) --out-fmt-ihx
+PYCLIENT=statuslight_client*whl
 
 .PHONY: clean flash
 
-all: $(HEXFILE)
+all: $(HEXFILE) $(PYCLIENT)
 
-$(HEXFILE): $(OBJECTS)
-	$(SDCC) $(MFLAGS) $(LFLAGS) $(OBJECTS) -o $(HEXFILE)
+fw: $(HEXFILE)
+
+client: $(PYCLIENT)
+
+flash:
+	$(MAKE) -C src flash
 
 clean:
-	rm -f $(OBJECTS)
-	rm -f *asm *cdb *lst *map *mem *rel *rst *sym *lk
+	$(MAKE) -C src clean
+	$(MAKE) -C client/python clean
 	rm -f $(HEXFILE)
+	rm -f $(PYCLIENT)
 
-flash: $(OBJECTS)
-	$(STM8FLASH) -c$(PROGRAMMER) -p$(DEVICE) -w $(OBJECTS)
+$(HEXFILE):
+	$(MAKE) -C src
 
-%.rel: %.c $(HEADERS)
-	$(SDCC) -c $(MFLAGS) $(CFLAGS) $<
+$(PYCLIENT):
+	$(MAKE) -C client/python
