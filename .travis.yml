@@ -1,12 +1,19 @@
 language: c
+
 dist: xenial
+
 install:
 - wget https://netix.dl.sourceforge.net/project/sdcc/sdcc-linux-amd64/3.8.0/sdcc-3.8.0-amd64-unknown-linux2.5.tar.bz2
 - tar xjf sdcc-3.8.0-amd64-unknown-linux2.5.tar.bz2
 - pushd sdcc-3.8.0 && sudo cp -r * /usr/local && popd && sdcc -v
 - git clone -q --depth 1 https://github.com/fayoh/stm8s-util.git
 - pushd stm8s-util && sudo make PREFIX=/usr/local/share/sdcc install && popd
+- pyenv install 3.6 -s
+- pyenv global 3.6
+- pip install --user poetry
+
 script: make
+
 deploy:
   provider: releases
   skip_cleanup: true
