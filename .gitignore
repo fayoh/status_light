@@ -66,4 +66,7 @@ dkms.conf
 # Python output
 *pyc
 *whl
-*tar.gz
+*tar.gz.coverage
+.coverage
+client/python/.pytest_cache/
+client/python/statuslight_client.egg-info/

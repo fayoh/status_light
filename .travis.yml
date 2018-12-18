@@ -1,6 +1,10 @@
-language: c
+language: minimal
 
 dist: xenial
+
+env:
+  global:
+    - CC_TEST_REPORTER_ID=017785be117b3eae5746a7128bae39c21fdb4756cb32f7a29700c2eb884befca
 
 install:
 - wget https://netix.dl.sourceforge.net/project/sdcc/sdcc-linux-amd64/3.8.0/sdcc-3.8.0-amd64-unknown-linux2.5.tar.bz2
@@ -8,11 +12,22 @@ install:
 - pushd sdcc-3.8.0 && sudo cp -r * /usr/local && popd && sdcc -v
 - git clone -q --depth 1 https://github.com/fayoh/stm8s-util.git
 - pushd stm8s-util && sudo make PREFIX=/usr/local/share/sdcc install && popd
-- pyenv install 3.6 -s
-- pyenv global 3.6
+- pyenv install 3.6.3 -s
+- pyenv global 3.6.3
 - pip install --user poetry
+- poetry -V
 
-script: make
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
+script:
+  - make
+  - make test
+
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 
 deploy:
   provider: releases

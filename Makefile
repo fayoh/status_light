@@ -3,9 +3,12 @@ MAKE=make
 HEXFILE=status_light.hex
 PYCLIENT=statuslight_client*whl
 
-.PHONY: clean flash
+.PHONY: clean flash test
 
 all: $(HEXFILE) $(PYCLIENT)
+
+test: $(HEXFILE) $(PYCLIENT) test
+	$(MAKE) -C client/python test
 
 fw: $(HEXFILE)
 
