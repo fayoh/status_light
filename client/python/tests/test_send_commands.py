@@ -27,8 +27,8 @@ def test_clear(mocker):
     obj = statuslight.Statuslight()
     obj.clear()
     calls = [call(b'a\x00'), call(b'A\x00'), call(b'!\x00'),
-             call(b'b\x00'), call(b'B\x00'), call(b'"\x00'),
-             call(b'd\x00'), call(b'D\x00'), call(b'$\x00')]
+	     call(b'b\x00'), call(b'B\x00'), call(b'"\x00'),
+	     call(b'd\x00'), call(b'D\x00'), call(b'$\x00')]
     assert obj.conn.write.call_count == len(calls)
     obj.conn.write.assert_has_calls(calls)
 
