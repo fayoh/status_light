@@ -31,7 +31,6 @@ after_script:
   - pushd client/python
   - poetry run ../../cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
   - popd
-  - sonar-scanner
 
 deploy:
   provider: releases
