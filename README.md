@@ -1,4 +1,4 @@
-# status_light [![Build Status](https://travis-ci.com/fayoh/status_light.svg?branch=master)](https://travis-ci.com/fayoh/status_light) [![CodeFactor](https://www.codefactor.io/repository/github/fayoh/status_light/badge)](https://www.codefactor.io/repository/github/fayoh/status_light)
+# status_light [![Build Status](https://travis-ci.com/fayoh/status_light.svg?branch=master)](https://travis-ci.com/fayoh/status_light) [![Maintainability](https://api.codeclimate.com/v1/badges/9c8e848212beba8fd5fd/maintainability)](https://codeclimate.com/github/fayoh/status_light/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/9c8e848212beba8fd5fd/test_coverage)](https://codeclimate.com/github/fayoh/status_light/test_coverage)
 Simple build status light from a toy traffic light and a serial connection to the computer.
 
 This repo contains the firmware for the mcu in the traffic light and a
