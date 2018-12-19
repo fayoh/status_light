@@ -12,7 +12,7 @@ dist/*wheel: $(PYOBJECTS)
 
 test:
 	$(POETRY) install
-	$(POETRY) run py.test --cov=statuslight_client.statuslight tests
+	$(POETRY) run py.test --cov=statuslight_client.statuslight statuslight_client
 	$(POETRY) run coverage xml
 
 clean:
