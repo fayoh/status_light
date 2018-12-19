@@ -7,6 +7,9 @@ dist: xenial
 env:
   global:
     - CC_TEST_REPORTER_ID=017785be117b3eae5746a7128bae39c21fdb4756cb32f7a29700c2eb884befca
+    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+    #   via the "travis encrypt" command using the project repo's public key
+    - secure: "ZRDstFvAigrOPtZzfZavPQbJCzAeb6sw1m9pnz18BnrKjgDdfsTPuziQaDOpyH1zYQZZ7RfpMZqfJKJ1yeZEHWeOntv+msKsler1yVDh/lSDLkSP0wEAB5CPzVled5WytlHpPwECH830Lyb2PDf/AoIV+3w+MLI8Wc3GXO6Pwy69VxFSHYdWpS0TTW8XrqSLtfnMrOZyIBDG06sa6rp73JFAyjL79kBxRHJS3MOGINTPccOKu9AhDDTTGjZxTcaD3c9S/pINUrbB2i1mOs1X9VbWJ5CHpzxARgFY7MywXkpBAnk7T6JX6Yf60c4Oy9WWFcKNTx6s+cTEGWMSkVv2VNfKJOO+2xXMEKpHvXM27NJf9AJ4HrgilEWmRfX9/u6p6aXnlK+LM8gKo2A0ZLlSQpcTSRgd36+/PLYaTK/XYqT3LArfls/ulHIdIiGYalX6VKDPg3EMzkTZ7ua+d2Q8jiEC3HwTNJFoS+YNS8uXRNxD8FutzrmEu615Ste2t679HXvasFWfFkjfpvhvdm4ee7Y6ngdC++cnZI+Isp11THb/NbhrlIfdu6OvbelWAG1r7yZzJDiUvemaEYfEmLfo8lWxQujXMZNMEa34KAfeOPd01BAn4PCUCT0eX2iSfwQxoVSIJUBgDNvBNNwwdmHUfIIaY7bUIURfkeYudEGtZV4="
 
 install:
   - python -V
@@ -41,3 +44,13 @@ deploy:
   on:
     tags: true
     repo: fayoh/status_light
+
+addons:
+  coverity_scan:
+    project:
+      name: "fayoh/status_light"
+      description: "<Your project description here>"
+    notification_email: daniel.f.bengtsson@gmail.com
+    build_command_prepend: ""
+    build_command: "make"
+    branch_pattern: coverity_scan
