@@ -4,6 +4,9 @@ python:
 
 dist: xenial
 
+jdk:
+  -oraclejdk8
+
 env:
   global:
     - CC_TEST_REPORTER_ID=017785be117b3eae5746a7128bae39c21fdb4756cb32f7a29700c2eb884befca
@@ -25,6 +28,7 @@ before_script:
 
 script:
   - make
+  - sonar-scanner
 
 after_script:
   - pushd client/python
@@ -41,3 +45,10 @@ deploy:
   on:
     tags: true
     repo: fayoh/status_light
+
+addons:
+  sonarcloud:
+    organization: "fayoh-github"
+    token:
+      secure: "nnnc2gtacjKwyNwNnYI2AVVdO+WOb2MoFklroa2Ycwa7FtxesnuArO01XTpcfwqJJa2DP5P4PeiWlcYYaz1C5Bo5EyA0gjHeWP32PaO4dXxfihr/sxLNU1chCPFiaGCLw79RCei5JVpe9WB2e/w9ZYakmcKS7Rz3UwVnAMG+tI43k5JZwe+sZH0cIPKq9feB63l+zO39TDYOHkcZJSviFblpP6jOF4RidJrgd+iylfOVrr7bH2qsqMA8LXIz/++FNXqZv3hSxRwIDLHEj642s6xkydLhmwedypEz3xwuu4B4jU3tJipXSPOdbomsSK1yMirzX5VwXmP8lpo/N9auBJAvYhx4cG3x+fFIqP6zs/OIasNtfYsFTOiRotlIQBSRr5qxVEGEo1x04Dd3OknwV3/7h+pwn+HYmhzkOJqCThIbpfxjKhUuf0ag/007gPflFBgPEwTlTTDVzF4p/cduuyJmMrKN0VGKJ75ZeFl9ZGIOK20cc/kdd+dZTLHKLn0M4n23rkINS+eMQcMVAO0ICBUbH1ZSB5bWBG1BoglSf5MMCf1XyCB7QWsbcwsEG59c1k9k9vwQju+dPY60rMImGW6kfPd1dqCmNLVXuYqkJ5wYCPxg6jEGgIIpGTKeo8RUrSpVZUiA0plRdbjKYRjOpQY/T2rL3i9paPbyPri1mzY="
+      
