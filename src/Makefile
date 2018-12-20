@@ -25,6 +25,8 @@ clean:
 	rm -f *asm *cdb *lst *map *mem *rel *rst *sym *lk
 	rm -f $(HEXFILE)
 
+test:
+	echo "Tests should be implemented here."
 
 flash: $(OBJECTS)
 	$(STM8FLASH) -c$(PROGRAMMER) -p$(DEVICE) -w $(OBJECTS)

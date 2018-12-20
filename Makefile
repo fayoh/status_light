@@ -3,12 +3,16 @@ MAKE=make
 HEXFILE=status_light.hex
 PYCLIENT=statuslight_client*whl
 
-.PHONY: clean flash test
+SUBDIRS= src client/python
+
+.PHONY: all clean flash test fw
 
 all: $(HEXFILE) $(PYCLIENT)
 
-test: $(HEXFILE) $(PYCLIENT) test
-	$(MAKE) -C client/python test
+test: $(HEXFILE) $(PYCLIENT)
+	for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir test; \
+	done
 
 fw: $(HEXFILE)
 
@@ -18,8 +22,9 @@ flash:
 	$(MAKE) -C src flash
 
 clean:
-	$(MAKE) -C src clean
-	$(MAKE) -C client/python clean
+	for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir clean; \
+	done
 	rm -f $(HEXFILE)
 	rm -f $(PYCLIENT)
 

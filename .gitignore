@@ -67,9 +67,10 @@ dkms.conf
 *pyc
 *whl
 *tar.gz.coverage
-.coverage
-client/python/.pytest_cache/
-client/python/statuslight_client.egg-info/
-**/poetry.lock
+**/*.egg-info/
+
+# Coverage output
 **/coverage.xml
 cov-int
+**/.pytest_cache
+.coverage
