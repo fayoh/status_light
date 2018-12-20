@@ -72,3 +72,4 @@ client/python/.pytest_cache/
 client/python/statuslight_client.egg-info/
 **/poetry.lock
 **/coverage.xml
+cov-int
