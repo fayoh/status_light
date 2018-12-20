@@ -2,6 +2,8 @@ PYCLIENT=statuslight_client*whl
 PYOBJECTS=statuslight_client/statuslight.py
 POETRY=poetry
 
+.PHONY: all test clean
+
 all: dist/*wheel
 	echo $(PYCLIENT)
 
@@ -12,8 +14,8 @@ dist/*wheel: $(PYOBJECTS)
 
 test:
 	$(POETRY) install
-	$(POETRY) run py.test --cov=statuslight_client.statuslight statuslight_client
-	$(POETRY) run coverage xml
+	$(POETRY) run py.test --cov-report xml --cov=statuslight_client.statuslight statuslight_client
+	$(POETRY) run pycodestyle statuslight_client
 
 clean:
 	rm -rf dist
